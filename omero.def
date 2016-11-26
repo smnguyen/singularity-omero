@@ -1,0 +1,70 @@
+BootStrap: debootstrap
+OSVersion: trusty
+MirrorURL: http://us.archive.ubuntu.com/ubuntu/
+
+%post
+  echo "Installing build tools"
+  sed 's/main$/main universe/' -i /etc/apt/sources.list
+  apt-get update
+  apt-get install -y --no-install-recommends \
+    software-properties-common gcc g++ wget
+
+  echo "Installing OMERO dependencies"
+  add-apt-repository -y ppa:openjdk-r/ppa
+  add-apt-repository -y ppa:fkrull/deadsnakes-python2.7
+  apt-get update
+  apt-get install -y --no-install-recommends \
+    openjdk-7-jre \
+    python python-dev \
+    python-pip \
+    python-virtualenv \
+    python-matplotlib python-scipy python-tables \
+    libtiff5-dev libjpeg8-dev zlib1g-dev libfreetype6-dev liblcms2-dev \
+    libwebp-dev tcl8.6-dev tk8.6-dev
+  pip install --upgrade pip
+  /usr/local/bin/pip install "Pillow==2.9.0"
+
+  echo "Installing Ice 3.6"
+  apt-key adv --keyserver keyserver.ubuntu.com --recv 5E6DA83306132997
+  apt-add-repository "deb http://zeroc.com/download/apt/ubuntu`lsb_release -rs` stable main"
+  apt-get update
+  apt-get install -y --no-install-recommends \
+    db5.3-util libssl-dev libbz2-dev libmcpp-dev libdb++-dev libdb-dev \
+    zeroc-ice-all-runtime zeroc-ice-all-dev
+  /usr/local/bin/pip install "zeroc-ice==3.6.3"
+
+  echo "Installing Postgres"
+  add-apt-repository -y "deb http://apt.postgresql.org/pub/repos/apt/ trusty-pgdg main"
+  wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -
+  apt-get update
+  apt-get install -y --no-install-recommends postgresql-9.4
+
+  echo "Installing OMERO.web dependencies"
+  add-apt-repository -y ppa:nginx/stable
+  apt-get update
+  apt-get install -y --no-install-recommends \
+    nginx openssl
+  /usr/local/bin/pip install \
+    "django==1.8.16" \
+    "django-debug-toolbar==1.6" \
+    "gunicorn==19.6.0"
+
+  echo "Installing supervisor"
+  apt-get install -y --no-install-recommends supervisor
+
+  echo "Installing OMERO"
+  export OMERO_DIR=/omero
+  export OMERO_HOME=$OMERO_DIR/OMERO.server
+  /usr/local/bin/pip install "omego==0.4.1"
+  mkdir $OMERO_DIR
+  cd $OMERO_DIR
+  omego download --branch=5.2.6 --ice 3.6 --unzipdir . -v server
+  rm OMERO.server*zip
+  ln -s OMERO.server-* $OMERO_HOME
+
+  echo "Creating bind points"
+  mkdir $OMERO_DIR/launch_scripts
+  mkdir $OMERO_DIR/data
+  mkdir $OMERO_DIR/logs
+  mkdir $OMERO_DIR/user_scripts
+  mkdir $OMERO_DIR/postgres
