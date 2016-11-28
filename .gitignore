@@ -1,1 +1,8 @@
+# Singularity image
 *.img
+
+# Runtime data
+data/*
+logs/*
+postgres/*
+user_scripts/*

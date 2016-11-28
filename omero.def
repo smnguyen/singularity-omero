@@ -7,7 +7,7 @@ MirrorURL: http://us.archive.ubuntu.com/ubuntu/
   sed 's/main$/main universe/' -i /etc/apt/sources.list
   apt-get update
   apt-get install -y --no-install-recommends \
-    software-properties-common gcc g++ wget
+    software-properties-common gcc g++ wget less
 
   echo "Installing OMERO dependencies"
   add-apt-repository -y ppa:openjdk-r/ppa
@@ -38,6 +38,9 @@ MirrorURL: http://us.archive.ubuntu.com/ubuntu/
   wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -
   apt-get update
   apt-get install -y --no-install-recommends postgresql-9.4
+  locale-gen en_US.utf8
+  chmod -R o+rw /var/run/postgresql
+  service postgresql stop
 
   echo "Installing OMERO.web dependencies"
   add-apt-repository -y ppa:nginx/stable
@@ -50,7 +53,7 @@ MirrorURL: http://us.archive.ubuntu.com/ubuntu/
     "gunicorn==19.6.0"
 
   echo "Installing supervisor"
-  apt-get install -y --no-install-recommends supervisor
+  /usr/local/bin/pip install "supervisor==3.3.1"
 
   echo "Installing OMERO"
   export OMERO_DIR=/omero
@@ -61,10 +64,24 @@ MirrorURL: http://us.archive.ubuntu.com/ubuntu/
   omego download --branch=5.2.6 --ice 3.6 --unzipdir . -v server
   rm OMERO.server*zip
   ln -s OMERO.server-* $OMERO_HOME
+  chmod -R o+rw $OMERO_HOME
 
   echo "Creating bind points"
-  mkdir $OMERO_DIR/launch_scripts
+  mkdir $OMERO_DIR/run
   mkdir $OMERO_DIR/data
   mkdir $OMERO_DIR/logs
   mkdir $OMERO_DIR/user_scripts
   mkdir $OMERO_DIR/postgres
+  rm -r $OMERO_HOME/var
+  ln -s $OMERO_DIR/logs $OMERO_HOME/var
+  ln -s $OMERO_DIR/user_scripts $OMERO_HOME/lib/scripts/custom_scripts
+
+  echo "Configuring environment"
+  echo >> /environment
+  echo 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin' >> /environment
+  echo 'export PATH=/omero/OMERO.server/bin:/usr/lib/postgresql/9.4/bin:$PATH' >> /environment
+  echo >> /environment
+  echo 'unset TZ' >> /environment
+
+%runscript
+  supervisord -c /omero/run/supervisor.conf
