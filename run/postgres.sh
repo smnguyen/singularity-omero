@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
 
-export PGDATA=/omero/postgres
 export PGPASSWORD=omero
+export PG_PORT=5432
 export OMERO_ADMIN_PASSWORD=password
+
+export PGDATA=/omero/postgres
 
 if [ ! -f $PGDATA/PG_VERSION ]; then
 	echo "Initializing database..."
@@ -28,5 +30,4 @@ if [ ! -f $PGDATA/PG_VERSION ]; then
 	PGHOST=$SOCKET pg_ctl -m fast -w stop
 fi
 
-# pg_ctl -D $PGDATA -l /omero/logs/postgres.log start
-exec postgres
+exec postgres -p $PG_PORT

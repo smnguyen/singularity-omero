@@ -51,6 +51,9 @@ MirrorURL: http://us.archive.ubuntu.com/ubuntu/
     "django==1.8.16" \
     "django-debug-toolbar==1.6" \
     "gunicorn==19.6.0"
+  rm /etc/nginx/sites-enabled/default
+  chmod -R o+w /etc/nginx
+  chmod -R go+rw /var/log/nginx
 
   echo "Installing supervisor"
   /usr/local/bin/pip install "supervisor==3.3.1"
@@ -84,4 +87,5 @@ MirrorURL: http://us.archive.ubuntu.com/ubuntu/
   echo 'unset TZ' >> /environment
 
 %runscript
-  supervisord -c /omero/run/supervisor.conf
+  trap "/omero/run/shutdown.sh; exit" SIGHUP SIGINT SIGTERM
+  supervisord --nodaemon -c /omero/run/supervisor.conf
