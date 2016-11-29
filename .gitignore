@@ -3,6 +3,6 @@
 
 # Runtime data
 data/*
-logs/*
+var/*
 postgres/*
 user_scripts/*

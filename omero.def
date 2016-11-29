@@ -72,11 +72,11 @@ MirrorURL: http://us.archive.ubuntu.com/ubuntu/
   echo "Creating bind points"
   mkdir $OMERO_DIR/run
   mkdir $OMERO_DIR/data
-  mkdir $OMERO_DIR/logs
+  mkdir $OMERO_DIR/var
   mkdir $OMERO_DIR/user_scripts
   mkdir $OMERO_DIR/postgres
   rm -r $OMERO_HOME/var
-  ln -s $OMERO_DIR/logs $OMERO_HOME/var
+  ln -s $OMERO_DIR/var $OMERO_HOME/var
   ln -s $OMERO_DIR/user_scripts $OMERO_HOME/lib/scripts/custom_scripts
 
   echo "Configuring environment"
