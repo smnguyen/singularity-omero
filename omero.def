@@ -4,12 +4,16 @@ MirrorURL: http://us.archive.ubuntu.com/ubuntu/
 
 %post
   echo "Installing build tools"
+  # Enable the universe repository, otherwise we won't be able to find many of the
+  # required packages.
   sed 's/main$/main universe/' -i /etc/apt/sources.list
   apt-get update
   apt-get install -y --no-install-recommends \
     software-properties-common gcc g++ wget less
 
   echo "Installing OMERO dependencies"
+  # Suggested install instructions:
+  # https://www.openmicroscopy.org/site/support/omero5.2/sysadmins/unix/server-ubuntu1404-ice36.html
   add-apt-repository -y ppa:openjdk-r/ppa
   add-apt-repository -y ppa:fkrull/deadsnakes-python2.7
   apt-get update
@@ -22,6 +26,8 @@ MirrorURL: http://us.archive.ubuntu.com/ubuntu/
     libtiff5-dev libjpeg8-dev zlib1g-dev libfreetype6-dev liblcms2-dev \
     libwebp-dev tcl8.6-dev tk8.6-dev
   pip install --upgrade pip
+  # pip install ... fails for some reason after upgrading pip, but running
+  # with the absolute path to pip works.
   /usr/local/bin/pip install "Pillow==2.9.0"
 
   echo "Installing Ice 3.6"
@@ -39,7 +45,11 @@ MirrorURL: http://us.archive.ubuntu.com/ubuntu/
   apt-get update
   apt-get install -y --no-install-recommends postgresql-9.4
   locale-gen en_US.utf8
+  # The user running PostgreSQL requires write access to /var/run/postgresql
+  # so that the PostgreSQL process can write lock files.
   chmod -R o+rw /var/run/postgresql
+  # Installing PostgreSQL starts a database cluster, which we want to be stopped
+  # so that the build exits properly.
   service postgresql stop
 
   echo "Installing OMERO.web dependencies"
@@ -52,7 +62,12 @@ MirrorURL: http://us.archive.ubuntu.com/ubuntu/
     "django-debug-toolbar==1.6" \
     "gunicorn==19.6.0"
   rm /etc/nginx/sites-enabled/default
+  # The user running OMERO.web needs write access to /etc/nginx so
+  # OMERO.web can store its nginx configuration.
   chmod -R o+w /etc/nginx
+  # The user running nginx needs write access to /var/log/nginx so that
+  # nginx can initially inform the user about errors if provided log
+  # locations are invalid.
   chmod -R go+rw /var/log/nginx
 
   echo "Installing supervisor"
@@ -67,6 +82,8 @@ MirrorURL: http://us.archive.ubuntu.com/ubuntu/
   omego download --branch=5.2.6 --ice 3.6 --unzipdir . -v server
   rm OMERO.server*zip
   ln -s OMERO.server-* $OMERO_HOME
+  # OMERO.server writes to disk to store configuration settings, so we need
+  # to give "other" users read and write access.
   chmod -R o+rw $OMERO_HOME
 
   echo "Creating bind points"
@@ -81,12 +98,20 @@ MirrorURL: http://us.archive.ubuntu.com/ubuntu/
 
   echo "Configuring environment"
   echo >> /environment
+  # The run user's PATH is carried over, but we don't want that.
+  # For instance, OMERO.server can fail to launch if alternate Python
+  # installations are in the PATH. The following lines explicitly specify
+  # a PATH when inside the Singularity container.
   echo 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin' >> /environment
   echo 'export PATH=/omero/OMERO.server/bin:/usr/lib/postgresql/9.4/bin:$PATH' >> /environment
   echo >> /environment
+  # OMERO.server can fail to connect to the PG database if the TZ environment
+  # variable is set to an unsupported value, so we just unset it, since there
+  # doesn't seem to be a need for it in this environment.
   echo 'unset TZ' >> /environment
 
 %runscript
+  # Port defaults
   PG_PORT=5432
   REGISTRY_PORT=4061
   TCP_PORT=4063
