@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-export PGPASSWORD=omero
-
 while ! pg_isready -h localhost -p $PG_PORT -d omero -U omero --quiet; do
   echo "Waiting for database to be up."
   sleep 5s

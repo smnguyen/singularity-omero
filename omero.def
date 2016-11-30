@@ -119,10 +119,16 @@ MirrorURL: http://us.archive.ubuntu.com/ubuntu/
   WEB_PORT=4080
   HTTP_PORT=8080
 
+  # Default PostgreSQL password for the omero user
+  PGPASSWORD=omero
+
   while [ "$1" != "" ]; do
     case $1 in
       --pg-port )               shift
                                 PG_PORT=$1
+                                ;;
+      --pg-password )           shift
+                                PGPASSWORD=$1
                                 ;;
       --server-registry-port )  shift
                                 REGISTRY_PORT=$1
@@ -144,7 +150,7 @@ MirrorURL: http://us.archive.ubuntu.com/ubuntu/
     esac
     shift
   done
-  export PG_PORT REGISTRY_PORT TCP_PORT SSL_PORT WEB_PORT HTTP_PORT
+  export PG_PORT PGPASSWORD REGISTRY_PORT TCP_PORT SSL_PORT WEB_PORT HTTP_PORT
 
   trap "/omero/run/shutdown.sh; exit" SIGHUP SIGINT SIGTERM
   supervisord --nodaemon -c /omero/run/supervisor.conf

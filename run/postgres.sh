@@ -1,8 +1,5 @@
 #!/usr/bin/env bash
 
-export PGPASSWORD=omero
-export OMERO_ADMIN_PASSWORD=password
-
 export PGDATA=/omero/postgres
 
 if [ ! -f $PGDATA/PG_VERSION ]; then
@@ -24,7 +21,7 @@ if [ ! -f $PGDATA/PG_VERSION ]; then
 	createdb -O omero omero
 
 	INIT_FILE=/tmp/omero.sql
-	omero db script -f $INIT_FILE --password "$OMERO_ADMIN_PASSWORD"
+	omero db script -f $INIT_FILE --password password
 	psql -U omero -d omero -f $INIT_FILE
 	rm $INIT_FILE
 
