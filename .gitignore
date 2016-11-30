@@ -6,3 +6,4 @@ data/*
 var/*
 postgres/*
 user_scripts/*
+run/*.pid

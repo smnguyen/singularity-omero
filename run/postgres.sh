@@ -28,6 +28,11 @@ if [ ! -f $PGDATA/PG_VERSION ]; then
 	rm $INIT_FILE
 
 	PGHOST=$SOCKET pg_ctl -m fast -w stop
+
+	# On active config lines (lines not commented out), replace 'trust' with 'md5'.
+	# This requires passwords to be used when connecting to the database. If a
+	# database user does not have a password, they will not be able to connect.
+	sed -i.bak -E 's/^([^#].*)trust$/\1md5/' $PG_DATA/pg_hba.conf
 fi
 
 exec postgres -p $PG_PORT
