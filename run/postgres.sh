@@ -15,24 +15,26 @@ if [ ! -f $PGDATA/PG_VERSION ]; then
 	# http://stackoverflow.com/a/28262109
 	SOCKET=/tmp/pg_socket
 	mkdir -p $SOCKET
-	PGHOST=$SOCKET pg_ctl -o "-c listen_addresses='' -c unix_socket_directories='$SOCKET'" -w start
+	export PGHOST=$SOCKET
+	pg_ctl -o "-c listen_addresses='' -c unix_socket_directories='$SOCKET'" -w start
 
-	PGHOST=$SOCKET psql --username $USER -d postgres <<-EOSQL
+	psql --username $USER -d postgres <<-EOSQL
 		CREATE USER omero WITH SUPERUSER PASSWORD '$PGPASSWORD';
 	EOSQL
-	PGHOST=$SOCKET createdb -O omero omero
+	createdb -O omero omero
 
 	INIT_FILE=/tmp/omero.sql
 	omero db script -f $INIT_FILE --password "$OMERO_ADMIN_PASSWORD"
-	PGHOST=$SOCKET psql -U omero -d omero -f $INIT_FILE
+	psql -U omero -d omero -f $INIT_FILE
 	rm $INIT_FILE
 
-	PGHOST=$SOCKET pg_ctl -m fast -w stop
+	pg_ctl -m fast -w stop
+	unset PGHOST
 
 	# On active config lines (lines not commented out), replace 'trust' with 'md5'.
 	# This requires passwords to be used when connecting to the database. If a
 	# database user does not have a password, they will not be able to connect.
-	sed -i.bak -E 's/^([^#].*)trust$/\1md5/' $PG_DATA/pg_hba.conf
+	sed -i.bak -E 's/^([^#].*)trust$/\1md5/' $PGDATA/pg_hba.conf
 fi
 
 exec postgres -p $PG_PORT

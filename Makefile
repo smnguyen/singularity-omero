@@ -24,6 +24,7 @@ endif
 
 purge:
 	rm -rf data/*
+	rm -rf data/.omero
 	rm -rf var/*
 	mkdir -p var/log/supervisor
 	mkdir -p var/log/nginx
