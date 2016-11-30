@@ -1,13 +1,10 @@
 #!/usr/bin/env bash
 
 export PGPASSWORD=omero
-export PG_PORT=5432
-export TCP_PORT=4063
-export SSL_PORT=4064
 
-while ! pg_isready -d omero -U omero --quiet; do
-    echo "Waiting for database to be up."
-    sleep 5s
+while ! pg_isready -h localhost -p $PG_PORT -d omero -U omero --quiet; do
+  echo "Waiting for database to be up."
+  sleep 5s
 done
 
 omero config set omero.db.host localhost
@@ -17,9 +14,9 @@ omero config set omero.db.user omero
 omero config set omero.db.pass $PGPASSWORD
 
 omero config set omero.data.dir /omero/data
+omero config set omero.ports.registry $REGISTRY_PORT
 omero config set omero.ports.tcp $TCP_PORT
 omero config set omero.ports.ssl $SSL_PORT
-# TODO Set omero.ports.registry?
 
 # Daily task to clean up sessions
 # https://www.openmicroscopy.org/site/support/omero5.2/sysadmins/unix/install-web.html#omero-web-maintenance-unix-linux

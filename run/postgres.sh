@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
 export PGPASSWORD=omero
-export PG_PORT=5432
 export OMERO_ADMIN_PASSWORD=password
 
 export PGDATA=/omero/postgres
@@ -13,12 +12,13 @@ if [ ! -f $PGDATA/PG_VERSION ]; then
 
 	# Launch Postgres in a way that doesn't accept any connections unless the socket is known.
 	# This prevents OMERO.server from connecting to the database before it's fully setup.
+	# http://stackoverflow.com/a/28262109
 	SOCKET=/tmp/pg_socket
 	mkdir -p $SOCKET
 	PGHOST=$SOCKET pg_ctl -o "-c listen_addresses='' -c unix_socket_directories='$SOCKET'" -w start
 
 	PGHOST=$SOCKET psql --username $USER -d postgres <<-EOSQL
-		CREATE USER omero WITH SUPERUSER PASSWORD 'PGPASSWORD';
+		CREATE USER omero WITH SUPERUSER PASSWORD '$PGPASSWORD';
 	EOSQL
 	PGHOST=$SOCKET createdb -O omero omero
 

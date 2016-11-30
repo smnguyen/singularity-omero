@@ -87,5 +87,39 @@ MirrorURL: http://us.archive.ubuntu.com/ubuntu/
   echo 'unset TZ' >> /environment
 
 %runscript
+  PG_PORT=5432
+  REGISTRY_PORT=4061
+  TCP_PORT=4063
+  SSL_PORT=4064
+  WEB_PORT=4080
+  HTTP_PORT=8080
+
+  while [ "$1" != "" ]; do
+    case $1 in
+      --pg-port )               shift
+                                PG_PORT=$1
+                                ;;
+      --server-registry-port )  shift
+                                REGISTRY_PORT=$1
+                                ;;
+      --server-tcp-port )       shift
+                                TCP_PORT=$1
+                                ;;
+      --server-ssl-port )       shift
+                                SSL_PORT=$1
+                                ;;
+      --web )                   shift
+                                WEB_PORT=$1
+                                ;;
+      --http )                  shift
+                                HTTP_PORT=$1
+                                ;;
+      * )                       echo "Unrecognized parameter $1"
+                                exit 1
+    esac
+    shift
+  done
+  export PG_PORT REGISTRY_PORT TCP_PORT SSL_PORT WEB_PORT HTTP_PORT
+
   trap "/omero/run/shutdown.sh; exit" SIGHUP SIGINT SIGTERM
   supervisord --nodaemon -c /omero/run/supervisor.conf
