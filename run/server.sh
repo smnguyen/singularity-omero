@@ -16,8 +16,4 @@ omero config set omero.ports.registry $REGISTRY_PORT
 omero config set omero.ports.tcp $TCP_PORT
 omero config set omero.ports.ssl $SSL_PORT
 
-# Daily task to clean up sessions
-# https://www.openmicroscopy.org/site/support/omero5.2/sysadmins/unix/install-web.html#omero-web-maintenance-unix-linux
-omero web clearsessions
-
 exec omero admin start --foreground
