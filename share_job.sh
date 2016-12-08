@@ -22,8 +22,10 @@ if [ "$(echo $DAYS_SINCE_EPOCH % $LINES_IN_FILE | bc)" = "$(echo $POSITION_IN_FI
         done
 
         echo "SSH'ing to host: $HOST"
+        TUNNEL=""
         for PORT in $PORTS; do
-            ssh -nNT $HOST -L $PORT:localhost:$PORT
+            TUNNEL="$TUNNEL -L $PORT:localhost:$PORT"
         done
+        ssh -nNT $TUNNEL $HOST
     fi
 fi
