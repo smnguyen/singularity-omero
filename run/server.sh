@@ -5,6 +5,9 @@ while ! pg_isready -h localhost -p $PG_PORT -d omero -U omero --quiet; do
   sleep 5s
 done
 
+# Clean up lock files from killed OMERO instances.
+find -L /omero/data -name "*.lock" | xargs -I % rm %
+
 omero config set omero.db.host localhost
 omero config set omero.db.port $PG_PORT
 omero config set omero.db.name omero

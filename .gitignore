@@ -7,3 +7,6 @@ var/*
 postgres/*
 user_scripts/*
 run/*.pid
+
+# Jupyter checkpoints
+.ipynb_checkpoints/

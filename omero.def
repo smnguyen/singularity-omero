@@ -79,7 +79,7 @@ MirrorURL: http://us.archive.ubuntu.com/ubuntu/
   /usr/local/bin/pip install "omego==0.4.1"
   mkdir $OMERO_DIR
   cd $OMERO_DIR
-  omego download --branch=5.2.6 --ice 3.6 --unzipdir . -v server
+  omego download --branch=5.2.7 --ice 3.6 --unzipdir . -v server
   rm OMERO.server*zip
   ln -s OMERO.server-* $OMERO_HOME
   # OMERO.server writes to disk to store configuration settings, so we need
