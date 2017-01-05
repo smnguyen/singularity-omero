@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# Based heavily on a script by Derek Macklin
+
 USER_SHARE_FILE="$1"; shift
 SCRIPT_TO_SUBMIT="$1"; shift
 PORTS="$*"
