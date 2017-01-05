@@ -57,4 +57,4 @@ merged_image.setTitle(dir_name)
 
 # TODO Alternatively, we could upload directly to OMERO. But that probably
 # would not work in headless mode.
-IJ.run(merged_image, 'OME-TIFF...', 'save=%s.ome.tif compression=Uncompressed' % os.path.join(parent_dir_name, dir_name))
+IJ.run(merged_image, 'OME-TIFF...', 'save=%s.ome.tif compression=Uncompressed' % image_dir_path)
